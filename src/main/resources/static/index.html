@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spark Chat Translator Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #chat-box { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+        .message { margin-bottom: 10px; padding: 5px; border-radius: 5px; background: #f1f1f1; }
+        .translation { color: blue; font-style: italic; display: block; }
+    </style>
+</head>
+<body>
+    <h2>Spark Chat - Live Translation</h2>
+    <div id="chat-box"></div>
+    
+    <input type="number" id="senderId" placeholder="Sender ID (e.g. 1)">
+    <input type="number" id="receiverId" placeholder="Receiver ID (e.g. 2)">
+    <input type="text" id="msgText" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send Message</button>
+
+    <script>
+        // Real-world practice: Connect to WebSocket as Receiver (User 2)
+        const socket = new WebSocket("ws://localhost:8080/ws/chat?userId=2");
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const chatBox = document.getElementById('chat-box');
+            
+            let html = `<div class="message">
+                            <b>Original:</b> ${data.originalText}`;
+            if(data.showTranslation) {
+                html += `<span class="translation"><b>Translated:</b> ${data.translatedText}</span>`;
+            }
+            html += `</div>`;
+            
+            chatBox.innerHTML += html;
+        };
+
+        async function sendMessage() {
+            const payload = {
+                chatRoomId: 101,
+                senderId: document.getElementById('senderId').value,
+                receiverId: document.getElementById('receiverId').value,
+                message: document.getElementById('msgText').value
+            };
+
+            await fetch('/chat/send', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            document.getElementById('msgText').value = '';
+        }
+    </script>
+</body>
+</html>
