@@ -1,19 +1,31 @@
-package com.spark.chat.entity;
+package com.example.signup.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "users") // 'User' is often a reserved word in many databases
-@Getter 
+@Table(name = "users")
+@Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    @Id 
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    private String username;
-    private String preferredLanguage; // e.g., "en", "es"
+
+    @Column(unique = true, nullable = false)
+    private String name;
+
+    private int age;
+    private String gender;
+
+    @Column(unique = true, nullable = false)
+    private String mobile;
+
+    @Column(unique = true, nullable = false)
+    private String password;
+
+    private String token;
 }
