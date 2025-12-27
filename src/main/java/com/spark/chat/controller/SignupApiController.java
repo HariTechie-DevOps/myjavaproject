@@ -20,15 +20,18 @@ public class SignupApiController {
     public Map<String, Object> registerUser(@RequestBody User user) {
         Map<String, Object> response = new HashMap<>();
         try {
-            // This line actually takes the data and puts it into MySQL
-            userRepository.save(user);
-            
+            User savedUser = userRepository.save(user);
             response.put("success", true);
             response.put("token", "session_token_12345");
+        
+        // Adding age and gender to the response
+            response.put("userName", savedUser.getName());
+            response.put("userAge", savedUser.getAge());
+            response.put("userGender", savedUser.getGender());
+        
         } catch (Exception e) {
             response.put("success", false);
-            response.put("message", "Mobile number might already exist!");
-            response.put("field", "mobile");
+            response.put("message", "Registration failed!");
         }
         return response;
     }
