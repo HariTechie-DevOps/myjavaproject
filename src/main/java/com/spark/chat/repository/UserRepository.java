@@ -1,11 +1,13 @@
-package com.spark.chat.repository;
+package com.example.signup.repository;
 
-import com.spark.chat.entity.User;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import com.example.signup.entity.User;
 
-@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    // Real-world use case: Check if a username is already taken
-    // boolean existsByUsername(String username);
+
+    Optional<User> findByName(String name);
+    Optional<User> findByMobile(String mobile);
+    Optional<User> findByPassword(String password);
 }
