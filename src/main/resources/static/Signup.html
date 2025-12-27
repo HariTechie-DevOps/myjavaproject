@@ -167,12 +167,17 @@ function signup() {
   .then(res => res.json())
   .then(data => {
     if (!data.success) {
-      showError(data.field, data.message);
-      return;
+        showError(data.field, data.message);
+        return;
     }
-    localStorage.setItem("token", data.token);
-    alert("Signup successful");
-  })
+    
+    // Store more info in the browser's memory
+    localStorage.setItem("name", data.userName);
+    localStorage.setItem("age", data.userAge);
+    localStorage.setItem("gender", data.userGender);
+
+    alert("Signup successful!\nWelcome " + data.userName + " (" + data.userGender + "), age " + data.userAge);
+})
   .catch(() => alert("Backend not reachable"));
 }
 </script>
