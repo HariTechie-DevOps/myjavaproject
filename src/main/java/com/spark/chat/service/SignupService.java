@@ -1,9 +1,7 @@
 package com.example.signup.service;
 
 import java.util.UUID;
-
 import org.springframework.stereotype.Service;
-
 import com.example.signup.dto.SignupRequest;
 import com.example.signup.dto.SignupResponse;
 import com.example.signup.entity.User;
@@ -19,17 +17,9 @@ public class SignupService {
     }
 
     public SignupResponse signup(SignupRequest req) {
-
-        if (repo.findByName(req.getName()).isPresent()) {
-            return new SignupResponse(false, "name", "Name already exists", null);
-        }
-
+        // Logic: Only Mobile needs to be strictly unique for account identity
         if (repo.findByMobile(req.getMobile()).isPresent()) {
-            return new SignupResponse(false, "mobile", "Mobile number already registered", null);
-        }
-
-        if (repo.findByPassword(req.getPassword()).isPresent()) {
-            return new SignupResponse(false, "password", "Password already in use", null);
+            return new SignupResponse(false, "mobile", "Mobile number already registered", null, null, 0, null);
         }
 
         String token = UUID.randomUUID().toString();
@@ -44,6 +34,6 @@ public class SignupService {
 
         repo.save(user);
 
-        return new SignupResponse(true, null, "Signup successful", token);
+        return new SignupResponse(true, null, "Signup successful", token, user.getName(), user.getAge(), user.getGender());
     }
 }
