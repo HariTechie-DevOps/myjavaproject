@@ -5,111 +5,22 @@
 <title>Sign In</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
-}
-
-.container {
-  width: 360px;
-  margin: 40px auto;
-  background: #fff;
-  padding: 25px;
-  border-radius: 6px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-h2 {
-  text-align: center;
-  margin-bottom: 5px;
-}
-
-.sub {
-  text-align: center;
-  font-size: 13px;
-  color: #555;
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  margin-top: 12px;
-  font-weight: 600;
-}
-
-.input-group {
-  display: flex;
-}
-
-select, input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 6px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box; /* Ensures padding doesn't affect width */
-}
-
-select {
-  width: 30%;
-  margin-right: 6px;
-}
-
-/* FIX: Arrangement for Remember Me and Forgot Password */
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 15px;
-}
-
-.row label {
-  margin-top: 0; /* Remove default label margin for alignment */
-  font-weight: normal;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-}
-
-.row input[type="checkbox"] {
-  width: auto;
-  margin-top: 0;
-  margin-right: 5px;
-}
-
-.row a {
-  font-size: 13px;
-  color: #007bff;
-  text-decoration: none;
-}
-
-.row a:hover {
-  text-decoration: underline;
-}
-
-.error {
-  color: red;
-  font-size: 12px;
-  display: none;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 20px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.signup-link {
-  text-align: center;
-  margin-top: 15px;
-  font-size: 13px;
-}
+body { font-family: Arial, sans-serif; background: #f5f5f5; }
+.container { width: 360px; margin: 40px auto; background: #fff; padding: 25px; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+h2 { text-align: center; margin-bottom: 5px; }
+.sub { text-align: center; font-size: 13px; color: #555; margin-bottom: 20px; }
+label { display: block; margin-top: 12px; font-weight: 600; }
+.input-group { display: flex; }
+select, input { width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+select { width: 30%; margin-right: 6px; }
+.row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+.row label { margin-top: 0; font-weight: normal; font-size: 13px; display: flex; align-items: center; }
+.row input[type="checkbox"] { width: auto; margin-top: 0; margin-right: 5px; }
+.row a { font-size: 13px; color: #007bff; text-decoration: none; }
+.row a:hover { text-decoration: underline; }
+button { width: 100%; padding: 10px; margin-top: 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+.signup-link { text-align: center; margin-top: 15px; font-size: 13px; }
+.signup-link a { color: #007bff; text-decoration: none; font-weight: bold; }
 </style>
 </head>
 
@@ -119,11 +30,6 @@ button {
   <h2>Sign In</h2>
   <div class="sub">Go continue your journey</div>
 
-  
-  <label>Name</label>
-  <input id="name">
-  <div class="error" id="nameError"></div>
-  
   <label>Mobile</label>
   <div class="input-group">
     <select id="code">
@@ -133,15 +39,13 @@ button {
     </select>
     <input id="mobile" placeholder="Mobile Number">
   </div>
-  <div class="error" id="mobileError"></div>
 
   <label>Password</label>
   <input id="password" type="password" placeholder="Password">
-  <div class="error" id="passwordError"></div>
 
   <div class="row">
     <label><input type="checkbox" id="remember"> Remember me</label>
-    <a href="forgot-password.html">Forgot password?</a>
+    <a href="Forgotpassword.html">Forgot password?</a>
   </div>
 
   <button onclick="signin()">Sign In</button>
@@ -152,12 +56,16 @@ button {
 </div>
 
 <script>
+// If already logged in, skip the login page
 if (localStorage.getItem("token")) {
-    window.location.href = "home.html";
+    window.location.href = "dashboard.html"; 
 }
   
 function signin() {
-    const mobile = document.getElementById("code").value + document.getElementById("mobile").value.trim();
+    const mobileInput = document.getElementById("mobile").value.trim();
+    if(!mobileInput) { alert("Please enter mobile number"); return; }
+
+    const mobile = document.getElementById("code").value + mobileInput;
     const password = document.getElementById("password").value;
 
     fetch("/api/signin", {
@@ -166,22 +74,24 @@ function signin() {
         body: JSON.stringify({ mobile, password })
     })
     .then(res => res.json())
-    // Inside signin.html -> signin() function
     .then(data => {
       if (!data.success) {
-          alert("Invalid credentials"); // Still good to show if it fails
+          alert("Invalid credentials: " + data.message);
           return;
       }
 
-      // SAVE THE TOKEN (Real-world apps use localStorage)
+      // 1. Store the login token
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userName", data.userName); // Store name for the dashboard
 
-      // GO TO DASHBOARD IMMEDIATELY
+      // 2. Redirect instantly
       window.location.href = "dashboard.html"; 
-  })
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Server error. Please make sure Spring Boot is running on EC2.");
+    });
 }
-
-
 </script>
 
 </body>
