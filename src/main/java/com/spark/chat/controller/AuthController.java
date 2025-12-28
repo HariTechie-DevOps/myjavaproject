@@ -19,9 +19,17 @@ public class AuthController {
         this.repo = repo;
     }
 
+   // --- STEP 1: CREATE ACCOUNT ---
+    // This is called by your signup.html page
+    @PostMapping("/signup")
+    public SignupResponse signup(@RequestBody SignupRequest req) {
+        return authService.registerUser(req); 
+    }
+
+    // --- STEP 2: LOGIN TO ACCOUNT ---
+    // This is called by your signin.html page
     @PostMapping("/signin")
     public SignupResponse signin(@RequestBody SigninRequest req) {
-        // This calls the AuthService to check the database
         return authService.authenticate(req);
     }
 
