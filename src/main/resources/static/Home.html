@@ -48,9 +48,14 @@
     });
 
     function logout() {
-        localStorage.clear();
-        window.location.href = "signin.html";
-    }
+    // Clear the specific session token
+    localStorage.removeItem("token");
+    // Optional: Clear everything for safety
+    localStorage.clear(); 
+    // Redirect to sign-in
+    window.location.href = "signin.html";
+}
+       
 </script>
 </body>
 </html>
