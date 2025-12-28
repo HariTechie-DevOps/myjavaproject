@@ -1,4 +1,4 @@
-package com.example.signup.service;
+package com.spark.chat.service;
 
 import com.example.signup.entity.User;
 import com.example.signup.repository.UserRepository;
