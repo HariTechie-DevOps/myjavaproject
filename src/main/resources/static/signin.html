@@ -166,18 +166,19 @@ function signin() {
         body: JSON.stringify({ mobile, password })
     })
     .then(res => res.json())
+    // Inside signin.html -> signin() function
     .then(data => {
-        if (data.success) {
-            localStorage.setItem("token", data.token);
-            window.location.href = "home.html";
-        } else {
-            alert(data.message); 
-            // If the service said account doesn't exist, redirect them
-            if(data.message.includes("Account does not exist")) {
-                window.location.href = "signup.html";
-            }
-        }
-    });
+      if (!data.success) {
+          alert("Invalid credentials"); // Still good to show if it fails
+          return;
+      }
+
+      // SAVE THE TOKEN (Real-world apps use localStorage)
+      localStorage.setItem("token", data.token);
+
+      // GO TO DASHBOARD IMMEDIATELY
+      window.location.href = "dashboard.html"; 
+  })
 }
 
 
