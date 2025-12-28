@@ -38,7 +38,7 @@ public class AuthController {
         return Map.of("success", true, "token", user.getToken());
     }
 
-    @PostMapping("/forgot-password")
+    @PostMapping("/forgotpassword.html")
     public Map<String, Object> forgot(@RequestBody ForgotPasswordRequest req) {
         User user = repo.findByName(req.name).orElse(null);
         if (user == null || !user.getMobile().equals(req.mobile))
