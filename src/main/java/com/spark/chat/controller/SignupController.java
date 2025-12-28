@@ -1,24 +1,14 @@
 package com.example.signup.controller;
 
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
-import com.example.signup.dto.SignupRequest;
-import com.example.signup.dto.SignupResponse;
-import com.example.signup.service.SignupService;
-
-@RestController
-@RequestMapping("/api")
-@CrossOrigin
+@Controller
 public class SignupController {
-
-    private final SignupService service;
-
-    public SignupController(SignupService service) {
-        this.service = service;
-    }
-
-    @PostMapping("/signup")
-    public SignupResponse signup(@RequestBody SignupRequest request) {
-        return service.signup(request);
+    
+    @GetMapping("/signup")
+    public String signupPage() {
+        // This looks for signup.html in src/main/resources/static or templates
+        return "signup.html"; 
     }
 }
