@@ -1,4 +1,5 @@
 package com.spark.chat.service;
+import org.springframework.stereotype.Service;
 import com.spark.chat.entity.User;
 import com.spark.chat.repository.UserRepository;
 import java.util.Optional;
