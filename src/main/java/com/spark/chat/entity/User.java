@@ -23,7 +23,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String mobile;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false) // REMOVE unique = true here
     private String password;
 
     private String token;
