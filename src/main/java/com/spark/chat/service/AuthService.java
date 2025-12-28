@@ -26,6 +26,24 @@ public class AuthService {
         this.repo = repo;
     }
 
+    public SignupResponse registerUser(SignupRequest req) {
+    // Check if user already exists
+    if (repo.findByMobile(req.mobile).isPresent()) {
+        return new SignupResponse(false, "mobile", "Mobile already registered", null, null, 0, null);
+    }
+    
+    // Create and save new user
+    User newUser = new User();
+    newUser.setName(req.name);
+    newUser.setMobile(req.mobile);
+    newUser.setPassword(req.password);
+    newUser.setAge(req.age);
+    newUser.setGender(req.gender);
+    
+    repo.save(newUser);
+    return new SignupResponse(true, null, "User registered successfully", null, req.name, req.age, req.gender);
+}
+
     // --- SIGN IN LOGIC ---
     public SignupResponse authenticate(SigninRequest req) {
         Optional<User> userOpt = repo.findByMobile(req.mobile);
