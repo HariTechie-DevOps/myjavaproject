@@ -5,17 +5,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.example.signup.repository.UserRepository;
 import com.example.signup.entity.User;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Random;
 
-// These two classes fix the "cannot find symbol" errors
+// Request Blueprints
 class SigninRequest {
     public String mobile;
     public String password;
 }
 
-class ForgotPasswordRequest {
-    public String name;
-    public String mobile;
-    public String newPassword;
+class OtpRequest { 
+    public String mobile; 
+    public String otp; 
+}
+
+class PasswordUpdateRequest { 
+    public String mobile; 
+    public String newPassword; 
 }
 
 @RestController
@@ -25,6 +31,9 @@ public class AuthController {
 
     @Autowired 
     private UserRepository repo;
+
+    // In-memory storage for OTPs (Mobile Number -> OTP Code)
+    private Map<String, String> otpStorage = new HashMap<>();
 
     @PostMapping("/signin")
     public Map<String, Object> signin(@RequestBody SigninRequest req) {
@@ -38,14 +47,52 @@ public class AuthController {
         return Map.of("success", true, "token", user.getToken());
     }
 
-    @PostMapping("/forgotpassword")
-    public Map<String, Object> forgot(@RequestBody ForgotPasswordRequest req) {
-        User user = repo.findByName(req.name).orElse(null);
-        if (user == null || !user.getMobile().equals(req.mobile))
-            return Map.of("success", false, "message", "Invalid name or mobile");
+    // STEP 1: Generate and "Send" OTP
+    @PostMapping("/forgot-password/send-otp")
+    public Map<String, Object> sendOtp(@RequestBody Map<String, String> req) {
+        String mobile = req.get("mobile");
+        User user = repo.findByMobile(mobile).orElse(null);
+
+        if (user == null) {
+            return Map.of("success", false, "message", "Mobile number not registered");
+        }
+
+        // Generate 6-digit random OTP
+        String otp = String.format("%06d", new Random().nextInt(999999));
+        otpStorage.put(mobile, otp);
+
+        // REAL-WORLD EXAMPLE: In a production app like Zomato or Uber, 
+        // you would call an SMS API here. For now, we print it to the console.
+        System.out.println(">>> [SMS GATEWAY] Sending OTP " + otp + " to " + mobile);
+
+        return Map.of("success", true, "message", "OTP sent successfully");
+    }
+
+    // STEP 2: Verify the OTP
+    @PostMapping("/forgot-password/verify-otp")
+    public Map<String, Object> verifyOtp(@RequestBody OtpRequest req) {
+        String savedOtp = otpStorage.get(req.mobile);
+
+        if (savedOtp != null && savedOtp.equals(req.otp)) {
+            return Map.of("success", true);
+        }
+        return Map.of("success", false, "message", "Incorrect OTP");
+    }
+
+    // STEP 3: Final Update
+    @PostMapping("/forgot-password/update")
+    public Map<String, Object> updatePassword(@RequestBody PasswordUpdateRequest req) {
+        User user = repo.findByMobile(req.mobile).orElse(null);
+
+        if (user == null) {
+            return Map.of("success", false, "message", "User session expired");
+        }
 
         user.setPassword(req.newPassword);
         repo.save(user);
+        
+        // Remove OTP from memory after successful use
+        otpStorage.remove(req.mobile);
 
         return Map.of("success", true);
     }
