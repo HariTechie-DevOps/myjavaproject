@@ -122,63 +122,46 @@ function showError(field, message) {
 }
 
 function signup() {
-  clearErrors();
+    clearErrors();
 
-  const name = document.getElementById("name").value.trim();
-  const age = document.getElementById("age").value;
-  const gender = document.getElementById("gender").value;
-  const mobile = document.getElementById("code").value + document.getElementById("mobile").value.trim();
-  const password = document.getElementById("password").value;
+    const name = document.getElementById("name").value.trim();
+    const age = document.getElementById("age").value;
+    const gender = document.getElementById("gender").value;
+    const mobile = document.getElementById("code").value + document.getElementById("mobile").value.trim();
+    const password = document.getElementById("password").value;
 
-  let invalid = false;
+    let invalid = false;
 
-  if (!/^[A-Za-z ]{3,}$/.test(name)) {
-    showError("name", "Enter valid name");
-    invalid = true;
-  }
+    // --- Keep your Regex Validation here ---
+    if (!/^[A-Za-z ]{3,}$/.test(name)) { showError("name", "Enter valid name"); invalid = true; }
+    if (age < 1 || age > 120) { showError("age", "Enter valid age"); invalid = true; }
+    if (!gender) { showError("gender", "Select gender"); invalid = true; }
+    if (!/^[0-9]{7,15}$/.test(document.getElementById("mobile").value)) { showError("mobile", "Enter valid mobile number"); invalid = true; }
+    if (!/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) { showError("password", "Password must be strong"); invalid = true; }
+    if (invalid) return;
 
-  if (age < 1 || age > 120) {
-    showError("age", "Enter valid age");
-    invalid = true;
-  }
-
-  if (!gender) {
-    showError("gender", "Select gender");
-    invalid = true;
-  }
-
-  if (!/^[0-9]{7,15}$/.test(document.getElementById("mobile").value)) {
-    showError("mobile", "Enter valid mobile number");
-    invalid = true;
-  }
-
-  if (!/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
-    showError("password", "Password must be strong");
-    invalid = true;
-  }
-
-  if (invalid) return;
-
-  fetch("/api/signup", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, age, gender, mobile, password })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (!data.success) {
-        showError(data.field, data.message);
-        return;
-    }
-    
-    // Store more info in the browser's memory
-    localStorage.setItem("name", data.userName);
-    localStorage.setItem("age", data.userAge);
-    localStorage.setItem("gender", data.userGender);
-
-    alert("Signup successful!\nWelcome " + data.userName + " (" + data.userGender + "), age " + data.userAge);
-})
-  .catch(() => alert("Backend not reachable"));
+    // --- Updated Fetch Logic ---
+    fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, age, gender, mobile, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) {
+            showError(data.field, data.message);
+            return;
+        }
+        
+        // Displays data fetched back from MySQL
+        alert(`Signup successful!\nWelcome ${data.userName} (${data.userGender}), age ${data.userAge}`);
+        
+        // Real-time flow: send user to login automatically
+        setTimeout(() => {
+            window.location.href = "signin.html";
+        }, 1000);
+    })
+    .catch(() => alert("Server is down. Please check if Spring Boot is running."));
 }
 </script>
 
