@@ -1,0 +1,5 @@
+public class SigninRequest {
+  public String mobile;
+  public String password;
+  public boolean remember;
+}
