@@ -1,0 +1,31 @@
+@RestController
+@RequestMapping("/api")
+@CrossOrigin
+public class AuthController {
+
+  @Autowired UserRepository repo;
+
+  @PostMapping("/signin")
+  public Map<String,Object> signin(@RequestBody SigninRequest req) {
+    User user = repo.findByMobile(req.mobile).orElse(null);
+    if (user == null)
+      return Map.of("success",false,"field","mobile","message","Mobile not found");
+
+    if (!user.getPassword().equals(req.password))
+      return Map.of("success",false,"field","password","message","Invalid password");
+
+    return Map.of("success",true,"token",user.getToken());
+  }
+
+  @PostMapping("/forgot-password")
+  public Map<String,Object> forgot(@RequestBody ForgotPasswordRequest req) {
+    User user = repo.findByName(req.name).orElse(null);
+    if (user == null || !user.getMobile().equals(req.mobile))
+      return Map.of("success",false,"field","mobile","message","Invalid name or mobile");
+
+    user.setPassword(req.newPassword);
+    repo.save(user);
+
+    return Map.of("success",true);
+  }
+}
