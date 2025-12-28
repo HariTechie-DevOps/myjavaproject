@@ -1,4 +1,4 @@
-package com.example.signup.entity;
+package com.spark.chat.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
