@@ -155,44 +155,32 @@ button {
 if (localStorage.getItem("token")) {
     window.location.href = "home.html";
 }
-
+  
 function signin() {
-    document.querySelectorAll(".error").forEach(e => e.style.display="none");
-
-    const code = document.getElementById("code").value;
-    const rawMobile = document.getElementById("mobile").value.trim();
-    const mobile = code + rawMobile;
+    const mobile = document.getElementById("code").value + document.getElementById("mobile").value.trim();
     const password = document.getElementById("password").value;
-    const remember = document.getElementById("remember").checked;
-
-    if (!rawMobile || !password) {
-        alert("Please fill in all fields");
-        return;
-    }
 
     fetch("/api/signin", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ mobile, password, remember })
+        body: JSON.stringify({ mobile, password })
     })
     .then(res => res.json())
     .then(data => {
-        if (!data.success) {
-            const errField = data.field ? data.field : "mobile";
-            const errDiv = document.getElementById(errField + "Error");
-            if(errDiv) {
-                errDiv.innerText = data.message;
-                errDiv.style.display = "block";
-            } else {
-                alert(data.message);
+        if (data.success) {
+            localStorage.setItem("token", data.token);
+            window.location.href = "home.html";
+        } else {
+            alert(data.message); 
+            // If the service said account doesn't exist, redirect them
+            if(data.message.includes("Account does not exist")) {
+                window.location.href = "signup.html";
             }
-            return;
         }
-        localStorage.setItem("token", data.token);
-        window.location.href = "home.html";
-    })
-    .catch(err => alert("Connection error. Is the backend running?"));
+    });
 }
+
+
 </script>
 
 </body>
