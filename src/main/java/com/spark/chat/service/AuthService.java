@@ -26,11 +26,25 @@ public class AuthService {
         this.repo = repo;
     }
 
-    public SignupResponse registerUser(SignupRequest req) {
-    // Check if user already exists
+   public SignupResponse registerUser(SignupRequest req) {
+    // 1. Check if user already exists
     if (repo.findByMobile(req.mobile).isPresent()) {
         return new SignupResponse(false, "mobile", "Mobile already registered", null, null, 0, null);
     }
+    
+    // 2. Create and save new user
+    User newUser = new User();
+    newUser.setName(req.name);
+    newUser.setMobile(req.mobile);
+    newUser.setPassword(req.password);
+    newUser.setAge(req.age);
+    newUser.setGender(req.gender);
+    
+    repo.save(newUser);
+
+    // 3. Return success
+    return new SignupResponse(true, null, "User registered successfully", null, req.name, req.age, req.gender);
+}
     
     // Create and save new user
     User newUser = new User();
