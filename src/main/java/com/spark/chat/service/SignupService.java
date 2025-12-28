@@ -1,4 +1,4 @@
-package com.example.signup.service;
+package com.spark.chat.service;
 
 import java.util.UUID;
 import org.springframework.stereotype.Service;
