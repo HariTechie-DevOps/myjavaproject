@@ -16,6 +16,7 @@ body {
   background: #fff;
   padding: 25px;
   border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Added for better look */
 }
 
 h2 {
@@ -39,6 +40,7 @@ select, input {
   margin-top: 6px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  box-sizing: border-box; /* Ensures padding doesn't break width */
 }
 
 select {
@@ -65,6 +67,28 @@ button {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+/* NEW FOOTER STYLE */
+.footer {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.footer a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.footer a:hover {
+  text-decoration: underline;
 }
 </style>
 </head>
@@ -75,11 +99,11 @@ button {
   <h2>Sign Up</h2>
 
   <label>Name</label>
-  <input id="name">
+  <input id="name" placeholder="John Doe">
   <div class="error" id="nameError"></div>
 
   <label>Age</label>
-  <input id="age" type="number">
+  <input id="age" type="number" placeholder="25">
   <div class="error" id="ageError"></div>
 
   <label>Gender</label>
@@ -97,18 +121,19 @@ button {
       <option value="+1">+1</option>
       <option value="+44">+44</option>
     </select>
-    <input id="mobile">
+    <input id="mobile" placeholder="9876543210">
   </div>
   <div class="error" id="mobileError"></div>
 
   <label>Password</label>
-  <input id="password" type="password">
+  <input id="password" type="password" placeholder="Min 8 chars, 1 Cap, 1 Num">
   <div class="error" id="passwordError"></div>
 
   <button onclick="signup()">Sign Up</button>
+
   <div class="footer">
     Already have an account? <a href="signin.html">Sign In</a>
-</div>
+  </div>
 </div>
 
 <script>
@@ -130,20 +155,20 @@ function signup() {
     const name = document.getElementById("name").value.trim();
     const age = document.getElementById("age").value;
     const gender = document.getElementById("gender").value;
-    const mobile = document.getElementById("code").value + document.getElementById("mobile").value.trim();
+    const mobileValue = document.getElementById("mobile").value.trim();
+    const mobile = document.getElementById("code").value + mobileValue;
     const password = document.getElementById("password").value;
 
     let invalid = false;
 
-    // --- Keep your Regex Validation here ---
     if (!/^[A-Za-z ]{3,}$/.test(name)) { showError("name", "Enter valid name"); invalid = true; }
     if (age < 1 || age > 120) { showError("age", "Enter valid age"); invalid = true; }
     if (!gender) { showError("gender", "Select gender"); invalid = true; }
-    if (!/^[0-9]{7,15}$/.test(document.getElementById("mobile").value)) { showError("mobile", "Enter valid mobile number"); invalid = true; }
+    if (!/^[0-9]{7,15}$/.test(mobileValue)) { showError("mobile", "Enter valid mobile number"); invalid = true; }
     if (!/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) { showError("password", "Password must be strong"); invalid = true; }
+    
     if (invalid) return;
 
-    // --- Updated Fetch Logic ---
     fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -156,15 +181,12 @@ function signup() {
             return;
         }
         
-        // Displays data fetched back from MySQL
-        alert(`Signup successful!\nWelcome ${data.userName} (${data.userGender}), age ${data.userAge}`);
+        alert(`Signup successful!\nWelcome ${data.userName}`);
         
-        // Real-time flow: send user to login automatically
-        setTimeout(() => {
-            window.location.href = "signin.html";
-        }, 1000);
+        // Redirect to signin page
+        window.location.href = "signin.html";
     })
-    .catch(() => alert("Server is down. Please check if Spring Boot is running."));
+    .catch(() => alert("Error connecting to server."));
 }
 </script>
 
