@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.signup.entity.User;
+import com.spark.chat.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByMobile(String mobile);
