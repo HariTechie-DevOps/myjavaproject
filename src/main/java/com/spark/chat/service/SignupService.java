@@ -2,10 +2,10 @@ package com.spark.chat.service;
 
 import java.util.UUID;
 import org.springframework.stereotype.Service;
-import com.example.signup.dto.SignupRequest;
-import com.example.signup.dto.SignupResponse;
-import com.example.signup.entity.User;
-import com.example.signup.repository.UserRepository;
+import com.spark.chat.dto.SignupRequest;
+import com.spark.chat.dto.SignupResponse;
+import com.spark.chat.entity.User;
+import com.spark.chat.repository.UserRepository;
 
 @Service
 public class SignupService {
