@@ -16,24 +16,22 @@ public class SignupService {
         this.repo = repo;
     }
 
-    public SignupResponse signup(SignupRequest req) {
-        // Logic: Only Mobile needs to be strictly unique for account identity
-        if (repo.findByMobile(req.getMobile()).isPresent()) {
-            return new SignupResponse(false, "mobile", "Mobile number already registered", null, null, 0, null);
-        }
-
-        String token = UUID.randomUUID().toString();
-
-        User user = new User();
-        user.setName(req.getName());
-        user.setAge(req.getAge());
-        user.setGender(req.getGender());
-        user.setMobile(req.getMobile());
-        user.setPassword(req.getPassword());
-        user.setToken(token);
-
-        repo.save(user);
-
-        return new SignupResponse(true, null, "Signup successful", token, user.getName(), user.getAge(), user.getGender());
+    public SignupResponse register(SignupRequest req) {
+    // Change req.getMobile() to req.mobile
+    if (userRepository.findByMobile(req.mobile).isPresent()) {
+        return new SignupResponse(false, "mobile", "Mobile already exists", null, null, 0, null);
     }
+
+    User user = new User();
+    // Remove the "get" and parentheses from all lines below
+    user.setName(req.name);
+    user.setAge(req.age);
+    user.setGender(req.gender);
+    user.setMobile(req.mobile);
+    user.setPassword(req.password);
+    
+    userRepository.save(user);
+
+    return new SignupResponse(true, null, "User registered successfully", null, user.getName(), user.getAge(), user.getGender());
+}
 }
