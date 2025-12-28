@@ -1,8 +1,8 @@
 package com.spark.chat.controller;
 
-import com.example.signup.dto.*;
-import com.spark.chat.service.AuthService; // CHANGE THIS LINE
-import com.example.signup.repository.UserRepository;
+import com.spark.chat.dto.*;      // Change this to match your folder
+import com.spark.chat.service.AuthService; // This is the fix for the error!
+import com.spark.chat.repository.UserRepository;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
