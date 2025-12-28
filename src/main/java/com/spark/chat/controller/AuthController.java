@@ -21,6 +21,7 @@ public class AuthController {
 
     @PostMapping("/signin")
     public SignupResponse signin(@RequestBody SigninRequest req) {
+        // This calls the AuthService to check the database
         return authService.authenticate(req);
     }
 
