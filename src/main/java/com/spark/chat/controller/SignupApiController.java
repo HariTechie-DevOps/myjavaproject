@@ -1,4 +1,5 @@
-package com.example.signup.controller;
+package com.spark.chat.controller;
+
 
 import com.example.signup.dto.SignupRequest;
 import com.example.signup.dto.SignupResponse;
