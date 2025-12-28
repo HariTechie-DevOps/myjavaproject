@@ -1,4 +1,4 @@
-package com.example.signup.dto;
+package com.spark.chat.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
