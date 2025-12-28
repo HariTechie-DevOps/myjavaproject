@@ -15,8 +15,8 @@ import java.util.UUID;
 @Service
 public class AuthService {
 
-    // PASTE YOUR KEY HERE
-    private static final String API_KEY = "YOUR_FAST2SMS_API_KEY_HERE";
+    // PASTE YOUR FAST2SMS API KEY HERE
+    private static final String API_KEY = "273o16HgyGabwheWFQT4JtkRplVdLiIXB5j0YPxAmMON8zvUrSNZG2BSCTRU9uj0npIb4dy8Mq3Ycz5h";
 
     private final UserRepository repo;
 
@@ -24,7 +24,7 @@ public class AuthService {
         this.repo = repo;
     }
 
-    // --- SIGN IN ---
+    // --- SIGN IN LOGIC ---
     public SignupResponse authenticate(SigninRequest req) {
         Optional<User> userOpt = repo.findByMobile(req.mobile);
         if (userOpt.isEmpty()) {
@@ -40,50 +40,69 @@ public class AuthService {
         return new SignupResponse(true, null, "Login successful", token, user.getName(), user.getAge(), user.getGender());
     }
 
-    // --- FORGOT PASSWORD: STEP 1 (Send OTP via Fast2SMS) ---
+    // --- FORGOT PASSWORD: STEP 1 (Send OTP to REAL PHONE) ---
+    // FORGOT PASSWORD: STEP 1 (Generate, Save, and Send to Real Phone)
     public boolean generateOtp(String mobile) {
         Optional<User> userOpt = repo.findByMobile(mobile);
         if (userOpt.isPresent()) {
+            // 1. Generate a clean 6-digit OTP
             String otp = String.format("%06d", new Random().nextInt(999999));
+
+            // 2. Save to MySQL (Crucial so that verifyOtp can check it later)
             User user = userOpt.get();
-            user.setOtp(otp); 
+             user.setOtp(otp);
             repo.save(user);
 
-            // REAL-TIME SEND VIA FAST2SMS
-            try {
-                // Remove "+" if present (Fast2SMS needs 10 digits)
+            // 3. SEND TO REAL PHONE VIA FAST2SMS
+             try {
+                // Fast2SMS requires 10-digit numbers (removes +91 or +)
                 String cleanMobile = mobile.replace("+91", "").replace("+", "").trim();
-                
+            
+                // Build the Fast2SMS URL (using the 'otp' route)
                 String urlString = "https://www.fast2sms.com/dev/bulkV2?authorization=" + API_KEY + 
-                                   "&route=otp&variables_values=" + otp + 
-                                   "&numbers=" + cleanMobile;
+                               "&route=otp&variables_values=" + otp + 
+                               "&numbers=" + cleanMobile;
 
-                URL url = new URL(urlString);
+                 URL url = new URL(urlString);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
+                conn.setRequestProperty("cache-control", "no-cache");
+                 conn.setRequestProperty("User-Agent", "Mozilla/5.0");
 
                 int responseCode = conn.getResponseCode();
-                if (responseCode == 200) {
-                    System.out.println("OTP Sent Successfully to " + cleanMobile);
-                    return true;
-                } else {
-                    System.out.println("Fast2SMS Error Code: " + responseCode);
-                    return false;
+                if (responseCode == HttpURLConnection.HTTP_OK) { // 200 Success
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        response.append(line);
+                    }
+                    in.close();
+
+                    // Check if the Fast2SMS response actually says "request_id" or "true"
+                    if (response.toString().contains("true")) {
+                        System.out.println("FAST2SMS SUCCESS: OTP " + otp + " sent to " + cleanMobile);
+                        return true;
+                    }
                 }
+                System.err.println("FAST2SMS REJECTION: HTTP Code " + responseCode);
+                return false;
             } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
+                System.err.println("CONNECTION ERROR: " + e.getMessage());
                 return false;
             }
         }
         return false;
     }
 
+    // --- FORGOT PASSWORD: STEP 2 (Verify) ---
     public boolean verifyOtp(String mobile, String otp) {
         return repo.findByMobile(mobile)
                 .map(user -> user.getOtp() != null && user.getOtp().equals(otp))
                 .orElse(false);
     }
 
+    // --- FORGOT PASSWORD: STEP 3 (Update) ---
     public void updatePassword(String mobile, String newPassword) {
         repo.updatePassword(mobile, newPassword);
     }
