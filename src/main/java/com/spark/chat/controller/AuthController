@@ -1,31 +1,48 @@
+package com.spark.chat.controller;
+
+import com.example.signup.entity.User;
+import com.example.signup.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.HashMap;
+
 @RestController
 @RequestMapping("/api")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class AuthController {
 
-  @Autowired UserRepository repo;
+    @Autowired 
+    private UserRepository repo;
 
-  @PostMapping("/signin")
-  public Map<String,Object> signin(@RequestBody SigninRequest req) {
-    User user = repo.findByMobile(req.mobile).orElse(null);
-    if (user == null)
-      return Map.of("success",false,"field","mobile","message","Mobile not found");
+    @PostMapping("/signin")
+    public Map<String, Object> signin(@RequestBody SigninRequest req) {
+        User user = repo.findByMobile(req.mobile).orElse(null);
+        
+        if (user == null) {
+            return Map.of("success", false, "field", "mobile", "message", "Mobile not found");
+        }
 
-    if (!user.getPassword().equals(req.password))
-      return Map.of("success",false,"field","password","message","Invalid password");
+        if (!user.getPassword().equals(req.password)) {
+            return Map.of("success", false, "field", "password", "message", "Invalid password");
+        }
 
-    return Map.of("success",true,"token",user.getToken());
-  }
+        return Map.of("success", true, "token", user.getToken() != null ? user.getToken() : "dummy-token");
+    }
 
-  @PostMapping("/forgot-password")
-  public Map<String,Object> forgot(@RequestBody ForgotPasswordRequest req) {
-    User user = repo.findByName(req.name).orElse(null);
-    if (user == null || !user.getMobile().equals(req.mobile))
-      return Map.of("success",false,"field","mobile","message","Invalid name or mobile");
+    @PostMapping("/forgot-password")
+    public Map<String, Object> forgot(@RequestBody ForgotPasswordRequest req) {
+        // Finding user by Name as per your logic
+        User user = repo.findByName(req.name).orElse(null);
+        
+        if (user == null || !user.getMobile().equals(req.mobile)) {
+            return Map.of("success", false, "field", "mobile", "message", "Invalid name or mobile");
+        }
 
-    user.setPassword(req.newPassword);
-    repo.save(user);
+        user.setPassword(req.newPassword);
+        repo.save(user);
 
-    return Map.of("success",true);
-  }
+        return Map.of("success", true, "message", "Password updated successfully");
+    }
 }
