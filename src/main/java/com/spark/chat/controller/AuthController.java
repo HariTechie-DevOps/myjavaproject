@@ -2,6 +2,7 @@ package com.spark.chat.controller;
 
 import com.example.signup.dto.*;
 import com.example.signup.service.AuthService;
+import com.example.signup.repository.UserRepository; // Added this import
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
@@ -10,9 +11,12 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserRepository repo; // Added this variable
 
-    public AuthController(AuthService authService) {
+    // Updated Constructor to include the repo
+    public AuthController(AuthService authService, UserRepository repo) {
         this.authService = authService;
+        this.repo = repo;
     }
 
     @PostMapping("/signin")
@@ -38,6 +42,7 @@ public class AuthController {
         return Map.of("success", true);
     }
 
+    // This method was causing the error because 'repo' was missing
     @GetMapping("/user/profile")
     public SignupResponse getProfile(@RequestParam String token) {
         return repo.findAll().stream()
