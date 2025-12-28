@@ -37,4 +37,13 @@ public class AuthController {
         authService.updatePassword(req.mobile, req.newPassword);
         return Map.of("success", true);
     }
+
+    @GetMapping("/user/profile")
+    public SignupResponse getProfile(@RequestParam String token) {
+        return repo.findAll().stream()
+            .filter(u -> token.equals(u.getToken()))
+            .findFirst()
+            .map(u -> new SignupResponse(true, null, "Found", u.getToken(), u.getName(), u.getAge(), u.getGender()))
+            .orElseThrow(() -> new RuntimeException("Invalid Token"));
+    }
 }
