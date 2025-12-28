@@ -2,6 +2,7 @@ package com.spark.chat.controller;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.client.RestTemplate; // Added this
 import com.example.signup.repository.UserRepository;
 import com.example.signup.entity.User;
 import java.util.Map;
@@ -9,20 +10,9 @@ import java.util.HashMap;
 import java.util.Random;
 
 // Request Blueprints
-class SigninRequest {
-    public String mobile;
-    public String password;
-}
-
-class OtpRequest { 
-    public String mobile; 
-    public String otp; 
-}
-
-class PasswordUpdateRequest { 
-    public String mobile; 
-    public String newPassword; 
-}
+class SigninRequest { public String mobile; public String password; }
+class OtpRequest { public String mobile; public String otp; }
+class PasswordUpdateRequest { public String mobile; public String newPassword; }
 
 @RestController
 @RequestMapping("/api")
@@ -32,7 +22,9 @@ public class AuthController {
     @Autowired 
     private UserRepository repo;
 
-    // In-memory storage for OTPs (Mobile Number -> OTP Code)
+    // We need this to make the actual HTTP call to Fast2SMS
+    private RestTemplate restTemplate = new RestTemplate();
+
     private Map<String, String> otpStorage = new HashMap<>();
 
     @PostMapping("/signin")
@@ -47,32 +39,47 @@ public class AuthController {
         return Map.of("success", true, "token", user.getToken());
     }
 
-    // STEP 1: Generate and "Send" OTP
+    // STEP 1: Generate and Send REAL OTP
     @PostMapping("/forgot-password/send-otp")
     public Map<String, Object> sendOtp(@RequestBody Map<String, String> req) {
         String mobile = req.get("mobile");
+        
+        // 1. Check if user exists
         User user = repo.findByMobile(mobile).orElse(null);
-
         if (user == null) {
             return Map.of("success", false, "message", "Mobile number not registered");
         }
 
-        // Generate 6-digit random OTP
+        // 2. Generate 6-digit OTP
         String otp = String.format("%06d", new Random().nextInt(999999));
         otpStorage.put(mobile, otp);
 
-        // REAL-WORLD EXAMPLE: In a production app like Zomato or Uber, 
-        // you would call an SMS API here. For now, we print it to the console.
-        System.out.println(">>> [SMS GATEWAY] Sending OTP " + otp + " to " + mobile);
+        // 3. Send Real SMS via Fast2SMS
+        try {
+            String apiKey = "273o16HgyGabwheWFQT4JtkRplVdLiIXB5j0YPxAmMON8zvUrSNZG2BSCTRU9uj0npIb4dy8Mq3Ycz5hY";
+            
+            // Note: Use 'numbers' without the '+' sign if the API requires it. 
+            // Fast2SMS usually expects 10 digit numbers.
+            String cleanMobile = mobile.replace("+91", ""); 
+            
+            String url = "https://www.fast2sms.com/dev/bulkV2?authorization=" + apiKey + 
+                         "&route=otp&variables_values=" + otp + "&numbers=" + cleanMobile;
 
-        return Map.of("success", true, "message", "OTP sent successfully");
+            restTemplate.getForEntity(url, String.class);
+            System.out.println("Real SMS sent to " + mobile + " with OTP: " + otp);
+            
+            return Map.of("success", true, "message", "OTP sent to your phone");
+
+        } catch (Exception e) {
+            System.out.println("Failed to send real SMS: " + e.getMessage());
+            return Map.of("success", false, "message", "Failed to send SMS. Try again.");
+        }
     }
 
     // STEP 2: Verify the OTP
     @PostMapping("/forgot-password/verify-otp")
     public Map<String, Object> verifyOtp(@RequestBody OtpRequest req) {
         String savedOtp = otpStorage.get(req.mobile);
-
         if (savedOtp != null && savedOtp.equals(req.otp)) {
             return Map.of("success", true);
         }
@@ -83,15 +90,12 @@ public class AuthController {
     @PostMapping("/forgot-password/update")
     public Map<String, Object> updatePassword(@RequestBody PasswordUpdateRequest req) {
         User user = repo.findByMobile(req.mobile).orElse(null);
-
         if (user == null) {
             return Map.of("success", false, "message", "User session expired");
         }
 
         user.setPassword(req.newPassword);
         repo.save(user);
-        
-        // Remove OTP from memory after successful use
         otpStorage.remove(req.mobile);
 
         return Map.of("success", true);
