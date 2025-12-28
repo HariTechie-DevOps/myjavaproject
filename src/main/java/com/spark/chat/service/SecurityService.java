@@ -1,8 +1,6 @@
 package com.spark.chat.service;
-
-import com.example.signup.entity.User;
-import com.example.signup.repository.UserRepository;
-import org.springframework.stereotype.Service;
+import com.spark.chat.entity.User;
+import com.spark.chat.repository.UserRepository;
 import java.util.Optional;
 
 @Service
