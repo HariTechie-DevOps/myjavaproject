@@ -12,4 +12,9 @@ public class SignupResponse {
     private String field;
     private String message;
     private String token;
+    
+    // Added to support your frontend alerts
+    private String userName;
+    private int userAge;
+    private String userGender;
 }
