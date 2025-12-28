@@ -1,9 +1,9 @@
 package com.spark.chat.controller;
 
 
-import com.example.signup.dto.SignupRequest;
-import com.example.signup.dto.SignupResponse;
-import com.example.signup.service.SignupService;
+import com.spark.chat.dto.SignupRequest;
+import com.spark.chat.dto.SignupResponse;
+import com.spark.chat.service.SignupService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
