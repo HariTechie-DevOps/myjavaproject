@@ -1,4 +1,5 @@
-package com.example.signup.controller;
+package com.spark.chat.controller;
+
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
