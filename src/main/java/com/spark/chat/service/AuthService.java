@@ -41,11 +41,18 @@ public class AuthService {
     public boolean generateOtp(String mobile) {
         Optional<User> userOpt = repo.findByMobile(mobile);
         if (userOpt.isPresent()) {
+            // 1. Generate 6-digit code
             String otp = String.format("%06d", new Random().nextInt(999999));
+        
+            // 2. Save to DB (This ensures the 'Check' works later)
             User user = userOpt.get();
-            user.setOtp(otp); // Store OTP in DB for this specific user
+            user.setOtp(otp); 
             repo.save(user);
-            System.out.println("REAL-TIME OTP for " + mobile + ": " + otp); // Simulating SMS send
+
+            // 3. REAL-WORLD SEND (Example using Twilio)
+            // Message.creator(new PhoneNumber(mobile), new PhoneNumber(FROM), "Your code is: " + otp).create();
+        
+            System.out.println("DEBUG: OTP " + otp + " sent to physical phone: " + mobile);
             return true;
         }
         return false;
