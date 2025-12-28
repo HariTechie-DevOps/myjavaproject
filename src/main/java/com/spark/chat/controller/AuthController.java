@@ -1,8 +1,8 @@
 package com.spark.chat.controller;
 
 import com.example.signup.dto.*;
-import com.example.signup.service.AuthService;
-import com.example.signup.repository.UserRepository; // Added this import
+import com.spark.chat.service.AuthService; // CHANGE THIS LINE
+import com.example.signup.repository.UserRepository;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
