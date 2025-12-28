@@ -175,18 +175,16 @@ function signup() {
         body: JSON.stringify({ name, age, gender, mobile, password })
     })
     .then(res => res.json())
-    .then(data => {
-        if (!data.success) {
-            showError(data.field, data.message);
-            return;
-        }
-        
-        alert(`Signup successful!\nWelcome ${data.userName}`);
-        
-        // Redirect to signin page
-        window.location.href = "signin.html";
-    })
-    .catch(() => alert("Error connecting to server."));
+    // Inside signup.html -> signup() function
+.then(data => {
+    if (!data.success) {
+        showError(data.field, data.message);
+        return;
+    }
+    
+    // NO ALERT NEEDED. Go straight to login page.
+    window.location.href = "signin.html"; 
+  })
 }
 </script>
 
