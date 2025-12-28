@@ -19,19 +19,38 @@
         <button onclick="logout()">Logout</button>
     </div>
 
-    <script>
-        // Security Check: If no token, kick user back to signin
+   <script>
+    document.addEventListener("DOMContentLoaded", () => {
         const token = localStorage.getItem("token");
+        
         if (!token) {
             window.location.href = "signin.html";
-        } else {
-            document.getElementById("tokenDisplay").innerText = "Session Token: " + token;
+            return;
         }
 
-        function logout() {
-            localStorage.removeItem("token");
-            window.location.href = "signin.html";
-        }
-    </script>
+        // Real-time check: Ask backend if this token is still valid
+        fetch("/api/user/profile?token=" + token)
+            .then(res => {
+                if (!res.ok) throw new Error("Unauthorized");
+                return res.json();
+            })
+            .then(user => {
+                document.getElementById("tokenDisplay").innerHTML = `
+                    <p><strong>Welcome back, ${user.name}!</strong></p>
+                    <p>Age: ${user.age} | Gender: ${user.gender}</p>
+                    <small>Session: ${token}</small>
+                `;
+            })
+            .catch(() => {
+                localStorage.removeItem("token");
+                window.location.href = "signin.html";
+            });
+    });
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = "signin.html";
+    }
+</script>
 </body>
 </html>
