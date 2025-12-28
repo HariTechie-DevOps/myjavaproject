@@ -19,7 +19,7 @@ public class User {
     private int age;
     private String gender;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 15)
     private String mobile;
 
     @Column(nullable = false)
