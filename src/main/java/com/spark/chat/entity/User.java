@@ -16,15 +16,17 @@ public class User {
     private Long id;
 
     private String name;
-
     private int age;
     private String gender;
 
     @Column(unique = true, nullable = false)
     private String mobile;
 
-    @Column(nullable = false) // REMOVE unique = true here
+    @Column(nullable = false)
     private String password;
 
     private String token;
+
+    // Added for Forgot Password logic
+    private String otp; 
 }
