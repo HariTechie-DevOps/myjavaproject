@@ -1,8 +1,6 @@
-package com.spark.chat.service; // Check this carefully!
+package com.spark.chat.service;
 
-package com.spark.chat.service; // Use your actual folder name here
-
-import com.spark.chat.dto.*;    // Update DTO imports to match your folder
+import com.spark.chat.dto.*;
 import com.spark.chat.entity.User;
 import com.spark.chat.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +25,7 @@ public class AuthService {
         this.repo = repo;
     }
 
-    // 1. REGISTER NEW USER
+    // All your methods (registerUser, authenticate, etc.) must be INSIDE these braces
     public SignupResponse registerUser(SignupRequest req) {
         if (repo.findByMobile(req.mobile).isPresent()) {
             return new SignupResponse(false, "mobile", "Mobile already registered", null, null, 0, null);
@@ -42,7 +40,6 @@ public class AuthService {
         return new SignupResponse(true, null, "Registration successful", null, req.name, req.age, req.gender);
     }
 
-    // 2. AUTHENTICATE EXISTING USER
     public SignupResponse authenticate(SigninRequest req) {
         Optional<User> userOpt = repo.findByMobile(req.mobile);
         if (userOpt.isEmpty()) {
@@ -58,7 +55,6 @@ public class AuthService {
         return new SignupResponse(true, null, "Login successful", token, user.getName(), user.getAge(), user.getGender());
     }
 
-    // 3. GENERATE AND SEND OTP
     public boolean generateOtp(String mobile) {
         Optional<User> userOpt = repo.findByMobile(mobile);
         if (userOpt.isPresent()) {
@@ -73,24 +69,19 @@ public class AuthService {
                 URL url = new URL(urlString);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
-                int responseCode = conn.getResponseCode();
-                return responseCode == HttpURLConnection.HTTP_OK;
-            } catch (Exception e) {
-                return false;
-            }
+                return conn.getResponseCode() == 200;
+            } catch (Exception e) { return false; }
         }
         return false;
     }
 
-    // 4. VERIFY OTP
     public boolean verifyOtp(String mobile, String otp) {
         return repo.findByMobile(mobile)
                 .map(user -> user.getOtp() != null && user.getOtp().equals(otp))
                 .orElse(false);
     }
 
-    // 5. UPDATE PASSWORD
     public void updatePassword(String mobile, String newPassword) {
         repo.updatePassword(mobile, newPassword);
     }
-}
+} // Ensure this final closing brace exists!
