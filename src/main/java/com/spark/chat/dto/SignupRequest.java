@@ -1,4 +1,4 @@
-package com.example.signup.dto;
+package com.spark.chat.dto;
 
 public class SignupRequest {
     public String name;
