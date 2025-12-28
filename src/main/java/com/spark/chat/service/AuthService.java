@@ -1,8 +1,10 @@
 package com.spark.chat.service; // Check this carefully!
 
-import com.example.signup.dto.*;
-import com.example.signup.entity.User;
-import com.example.signup.repository.UserRepository;
+package com.spark.chat.service; // Use your actual folder name here
+
+import com.spark.chat.dto.*;    // Update DTO imports to match your folder
+import com.spark.chat.entity.User;
+import com.spark.chat.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
