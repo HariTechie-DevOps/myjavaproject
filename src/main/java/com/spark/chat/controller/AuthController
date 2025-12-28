@@ -1,16 +1,26 @@
 package com.spark.chat.controller;
 
-import com.example.signup.entity.User;
-import com.example.signup.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import com.example.signup.repository.UserRepository;
+import com.example.signup.entity.User;
 import java.util.Map;
-import java.util.HashMap;
+
+// These two classes fix the "cannot find symbol" errors
+class SigninRequest {
+    public String mobile;
+    public String password;
+}
+
+class ForgotPasswordRequest {
+    public String name;
+    public String mobile;
+    public String newPassword;
+}
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class AuthController {
 
     @Autowired 
@@ -19,30 +29,24 @@ public class AuthController {
     @PostMapping("/signin")
     public Map<String, Object> signin(@RequestBody SigninRequest req) {
         User user = repo.findByMobile(req.mobile).orElse(null);
-        
-        if (user == null) {
-            return Map.of("success", false, "field", "mobile", "message", "Mobile not found");
-        }
+        if (user == null)
+            return Map.of("success", false, "message", "Mobile not found");
 
-        if (!user.getPassword().equals(req.password)) {
-            return Map.of("success", false, "field", "password", "message", "Invalid password");
-        }
+        if (!user.getPassword().equals(req.password))
+            return Map.of("success", false, "message", "Invalid password");
 
-        return Map.of("success", true, "token", user.getToken() != null ? user.getToken() : "dummy-token");
+        return Map.of("success", true, "token", user.getToken());
     }
 
     @PostMapping("/forgot-password")
     public Map<String, Object> forgot(@RequestBody ForgotPasswordRequest req) {
-        // Finding user by Name as per your logic
         User user = repo.findByName(req.name).orElse(null);
-        
-        if (user == null || !user.getMobile().equals(req.mobile)) {
-            return Map.of("success", false, "field", "mobile", "message", "Invalid name or mobile");
-        }
+        if (user == null || !user.getMobile().equals(req.mobile))
+            return Map.of("success", false, "message", "Invalid name or mobile");
 
         user.setPassword(req.newPassword);
         repo.save(user);
 
-        return Map.of("success", true, "message", "Password updated successfully");
+        return Map.of("success", true);
     }
 }
