@@ -1,4 +1,4 @@
-package com.example.signup.repository;
+package com.spark.chat.repository;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
