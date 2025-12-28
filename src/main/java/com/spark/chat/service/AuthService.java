@@ -3,6 +3,7 @@ package com.example.signup.service;
 import com.example.signup.dto.*;
 import com.example.signup.entity.User;
 import com.example.signup.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value; // Crucial Import
 import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -15,8 +16,9 @@ import java.util.UUID;
 @Service
 public class AuthService {
 
-    // PASTE YOUR FAST2SMS API KEY HERE
-    private static final String API_KEY = "273o16HgyGabwheWFQT4JtkRplVdLiIXB5j0YPxAmMON8zvUrSNZG2BSCTRU9uj0npIb4dy8Mq3Ycz5h";
+    // 1. SECURE KEY: Spring pulls this from application.properties or Env Variables
+    @Value("${fast2sms.api.key}")
+    private String apiKey;
 
     private final UserRepository repo;
 
@@ -40,37 +42,32 @@ public class AuthService {
         return new SignupResponse(true, null, "Login successful", token, user.getName(), user.getAge(), user.getGender());
     }
 
-    // --- FORGOT PASSWORD: STEP 1 (Send OTP to REAL PHONE) ---
-    // FORGOT PASSWORD: STEP 1 (Generate, Save, and Send to Real Phone)
+    // --- FORGOT PASSWORD: STEP 1 (Generate, Save, and Send) ---
     public boolean generateOtp(String mobile) {
         Optional<User> userOpt = repo.findByMobile(mobile);
         if (userOpt.isPresent()) {
-            // 1. Generate a clean 6-digit OTP
             String otp = String.format("%06d", new Random().nextInt(999999));
 
-            // 2. Save to MySQL (Crucial so that verifyOtp can check it later)
             User user = userOpt.get();
-             user.setOtp(otp);
+            user.setOtp(otp);
             repo.save(user);
 
-            // 3. SEND TO REAL PHONE VIA FAST2SMS
-             try {
-                // Fast2SMS requires 10-digit numbers (removes +91 or +)
+            try {
                 String cleanMobile = mobile.replace("+91", "").replace("+", "").trim();
-            
-                // Build the Fast2SMS URL (using the 'otp' route)
-                String urlString = "https://www.fast2sms.com/dev/bulkV2?authorization=" + API_KEY + 
-                               "&route=otp&variables_values=" + otp + 
-                               "&numbers=" + cleanMobile;
+                
+                // 2. USING THE SECURE VARIABLE: Notice we use 'apiKey' here
+                String urlString = "https://www.fast2sms.com/dev/bulkV2?authorization=" + apiKey + 
+                                   "&route=otp&variables_values=" + otp + 
+                                   "&numbers=" + cleanMobile;
 
-                 URL url = new URL(urlString);
+                URL url = new URL(urlString);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 conn.setRequestProperty("cache-control", "no-cache");
-                 conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0");
 
                 int responseCode = conn.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_OK) { // 200 Success
+                if (responseCode == HttpURLConnection.HTTP_OK) {
                     BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     StringBuilder response = new StringBuilder();
                     String line;
@@ -79,7 +76,6 @@ public class AuthService {
                     }
                     in.close();
 
-                    // Check if the Fast2SMS response actually says "request_id" or "true"
                     if (response.toString().contains("true")) {
                         System.out.println("FAST2SMS SUCCESS: OTP " + otp + " sent to " + cleanMobile);
                         return true;
@@ -95,14 +91,12 @@ public class AuthService {
         return false;
     }
 
-    // --- FORGOT PASSWORD: STEP 2 (Verify) ---
     public boolean verifyOtp(String mobile, String otp) {
         return repo.findByMobile(mobile)
                 .map(user -> user.getOtp() != null && user.getOtp().equals(otp))
                 .orElse(false);
     }
 
-    // --- FORGOT PASSWORD: STEP 3 (Update) ---
     public void updatePassword(String mobile, String newPassword) {
         repo.updatePassword(mobile, newPassword);
     }
