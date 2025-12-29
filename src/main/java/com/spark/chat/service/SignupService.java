@@ -1,6 +1,5 @@
 package com.spark.chat.service;
 
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import com.spark.chat.dto.SignupRequest;
 import com.spark.chat.dto.SignupResponse;
@@ -13,11 +12,11 @@ public class SignupService {
     private final UserRepository userRepository;
 
     public SignupService(UserRepository userRepository) {
-        this.userRepository = userRepository;;
+        this.userRepository = userRepository; // Fixed: removed the extra semicolon
     }
 
-   // 3. Rename this method to 'signup' to match what your Controller expects
     public SignupResponse signup(SignupRequest req) {
+        // Checking if mobile exists
         if (userRepository.findByMobile(req.mobile).isPresent()) {
             return new SignupResponse(false, "mobile", "Mobile exists", null, null, 0, null);
         }
