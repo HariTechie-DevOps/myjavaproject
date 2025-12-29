@@ -9,8 +9,8 @@ import java.util.Collections;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.spark.chat", "com.example.signup"})
-@EnableJpaRepositories(basePackages = "com.example.signup.repository")
-@EntityScan(basePackages = "com.example.signup.entity")
+@EnableJpaRepositories("com.spark.chat.repository") // Tell Spring where the Repo is
+@EntityScan("com.spark.chat.entity")
 public class ChatApplication {
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(ChatApplication.class);
