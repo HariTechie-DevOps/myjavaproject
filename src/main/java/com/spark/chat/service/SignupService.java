@@ -10,28 +10,27 @@ import com.spark.chat.repository.UserRepository;
 @Service
 public class SignupService {
 
-    private final UserRepository repo;
+    private final UserRepository userRepository;
 
-    public SignupService(UserRepository repo) {
-        this.repo = repo;
+    public SignupService(UserRepository userRepository) {
+        this.userRepository = userRepository;;
     }
 
-    public SignupResponse register(SignupRequest req) {
-    // Change req.getMobile() to req.mobile
-    if (userRepository.findByMobile(req.mobile).isPresent()) {
-        return new SignupResponse(false, "mobile", "Mobile already exists", null, null, 0, null);
+   // 3. Rename this method to 'signup' to match what your Controller expects
+    public SignupResponse signup(SignupRequest req) {
+        if (userRepository.findByMobile(req.mobile).isPresent()) {
+            return new SignupResponse(false, "mobile", "Mobile exists", null, null, 0, null);
+        }
+
+        User user = new User();
+        user.setName(req.name);
+        user.setMobile(req.mobile);
+        user.setPassword(req.password);
+        user.setAge(req.age);
+        user.setGender(req.gender);
+
+        userRepository.save(user);
+
+        return new SignupResponse(true, null, "Success", null, user.getName(), user.getAge(), user.getGender());
     }
-
-    User user = new User();
-    // Remove the "get" and parentheses from all lines below
-    user.setName(req.name);
-    user.setAge(req.age);
-    user.setGender(req.gender);
-    user.setMobile(req.mobile);
-    user.setPassword(req.password);
-    
-    userRepository.save(user);
-
-    return new SignupResponse(true, null, "User registered successfully", null, user.getName(), user.getAge(), user.getGender());
-}
 }
